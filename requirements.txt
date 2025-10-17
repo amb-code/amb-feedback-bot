@@ -18,3 +18,5 @@ click==8.3.0
 
 # Monitoring
 sentry-sdk==2.39.0
+
+# venv hash bump 0
