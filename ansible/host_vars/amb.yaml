@@ -1,0 +1,15 @@
+project_name: 'amb-feedback-bot'
+repo: 'git@github.com:amb-code/{{ project_name }}.git'
+deployment_dir: '/home/docker/{{ project_name }}'
+
+tag: "{{ lookup('ansible.builtin.env', 'TAG') }}"
+env_name: "{{ lookup('ansible.builtin.env', 'ENVIRONMENT') }}"
+stage: "{{ lookup('ansible.builtin.env', 'STAGE') }}"
+
+db_username: "{{ lookup('ansible.builtin.env', 'AMB_DB_USERNAME') }}"
+db_password: "{{ lookup('ansible.builtin.env', 'AMB_DB_PASSWORD') }}"
+
+tg_token: "{{ lookup('ansible.builtin.env', 'AMB_TG_TOKEN') }}"
+tg_chat_id: "{{ lookup('ansible.builtin.env', 'AMB_TG_CHAT_ID') }}"
+
+sentry_dsn: "{{ lookup('ansible.builtin.env', 'AMB_SENTRY_DSN') }}"

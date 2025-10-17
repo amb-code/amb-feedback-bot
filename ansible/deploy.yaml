@@ -1,0 +1,7 @@
+- hosts: main
+  tasks:
+    - include_tasks: tasks/deploy.yaml
+
+- hosts: amb
+  tasks:
+    - include_tasks: tasks/deploy.yaml

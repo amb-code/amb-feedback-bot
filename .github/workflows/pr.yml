@@ -1,0 +1,26 @@
+name: Feature branch PR pipeline
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    name: Prepare
+    uses: amb-code/amb-ci-tools/.github/workflows/prepare-env.yml@v1.0.0
+    secrets: inherit
+
+  build:
+    name: Build
+    uses: amb-code/amb-ci-tools/.github/workflows/build-python.yml@v1.0.0
+    secrets: inherit
+
+    needs: [ prepare ]
+
+    with:
+      stage-name: ${{ needs.prepare.outputs.stage-name }}
+      env-name: development

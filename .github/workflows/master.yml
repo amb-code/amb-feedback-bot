@@ -1,0 +1,53 @@
+name: Master branch PR merge pipeline
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  prepare:
+    name: Prepare
+    uses: amb-code/amb-ci-tools/.github/workflows/prepare-env.yml@v1.0.0
+    secrets: inherit
+
+  build:
+    name: Build
+    uses: amb-code/amb-ci-tools/.github/workflows/build-python.yml@v1.0.0
+    secrets: inherit
+
+    needs: [ prepare ]
+
+    with:
+      stage-name: ${{ needs.prepare.outputs.stage-name }}
+      env-name: staging
+
+  release:
+    name: Release
+    uses: amb-code/amb-ci-tools/.github/workflows/release.yml@v1.0.0
+    secrets: inherit
+
+    needs: [ prepare, build ]
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    with:
+      stage-name: ${{ needs.prepare.outputs.stage-name }}
+      env-name: production
+      docker: true
+
+  deploy-production:
+    name: Deploy Production
+    uses: amb-code/amb-ci-tools/.github/workflows/deploy-ansible.yml@v1.0.0
+    secrets: inherit
+
+    needs: [ prepare, release ]
+
+    with:
+      stage-name: ${{ needs.prepare.outputs.stage-name }}
+      env-name: production
+      target-server: ${{ vars.TARGET_SERVER }}
+      tag: ${{ needs.release.outputs.new_version }}

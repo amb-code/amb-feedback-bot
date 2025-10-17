@@ -1,0 +1,16 @@
+[tool.isort]
+multi_line_output = 5
+line_length = 120
+
+[tool.semantic_release]
+version_variables = [
+    "Makefile:VERSION",
+    "feedbackbot/__init__.py:VERSION",
+]
+version_source = "commit"
+remote.type = "github"
+remote.token = { env = "GH_TOKEN" }
+
+[tool.pytest.ini_options]
+log_cli = true
+#log_cli_level = "DEBUG"

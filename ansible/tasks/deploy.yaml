@@ -1,0 +1,59 @@
+- name: Create project directory
+  ansible.builtin.file:
+    path: '{{ deployment_dir }}'
+    state: directory
+    force: no
+
+- name: Copy docker-compose.yml to deployment directory
+  ansible.builtin.copy:
+    src: ./../docker-compose.yml
+    dest: '{{ deployment_dir }}/docker-compose.yml'
+    remote_src: false
+
+- name: Create global .env
+  ansible.builtin.template:
+    src: ./../templates/global.env.j2
+    dest: '{{ deployment_dir }}/.env'
+
+- name: Create env directory
+  ansible.builtin.file:
+    path: '{{ deployment_dir }}/env'
+    state: directory
+
+- name: Generate bot.env
+  ansible.builtin.template:
+    src: ./../templates/bot.env.j2
+    dest: '{{ deployment_dir }}/env/bot.env'
+
+- name: Generate db.env
+  ansible.builtin.template:
+    src: ./../templates/db.env.j2
+    dest: '{{ deployment_dir }}/env/db.env'
+
+- name: Create data directory
+  ansible.builtin.file:
+    path: '{{ deployment_dir }}/data'
+    state: directory
+    owner: docker
+    group: docker
+
+- name: Ensure permissions on data
+  ansible.builtin.file:
+    path: '{{ deployment_dir }}/data'
+    owner: docker
+    group: docker
+    recurse: true
+
+- name: Docker tear down existing services
+  community.docker.docker_compose_v2:
+    project_src: '{{ deployment_dir }}'
+    state: absent
+
+- name: Run `docker compose up` again
+  community.docker.docker_compose_v2:
+    project_src: '{{ deployment_dir }}'
+
+- name: Docker prune images
+  community.docker.docker_prune:
+    images: true
+    builder_cache: true

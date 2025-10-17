@@ -1,0 +1,9 @@
+data
+tests
+ansible
+.git
+.env.example
+.gitignore
+docker-compose.dev.yml
+feedbackbot/manage.py
+README.md

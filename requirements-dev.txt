@@ -1,0 +1,18 @@
+# pytest
+pytest==8.*
+pytest-cov==6.*
+pytest-mock==3.*
+pytest-lazy-fixture==0.6.*
+
+# Factory Boy
+pytest-faker==2.*
+pytest-factoryboy==2.*
+
+# asyncio
+pytest-asyncio==1.1.0
+
+# sqlalchemy
+pytest-sqlalchemy-mock==0.1.7
+
+# Telegram
+ptb-unittest==1.1.1
