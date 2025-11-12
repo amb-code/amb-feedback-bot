@@ -2,79 +2,127 @@
 
 # AMB Feedback Bot
 
-A Telegram feedback bot for teams.
+Telegram-бот для обратной связи команд.
 
-At the moment, the bot has the following features:
-- allows you to anonymously communicate with users in Telegram
-- dialogue with each user is conducted in a separate topic
-- issuing and removing bans
-- editing previous messages
-- control of the chat history: the chat operator can delete a user or their own
-  messages, or completely clear the chat history on the user side
-- control of the user data history: the bot notifies about a change in the full 
-  name or user name, it is possible to see the full history of changes
-- Sentry error monitoring
+На данный момент бот имеет следующие возможности:
+- позволяет анонимно общаться с пользователями в Telegram
+- диалог с каждым пользователем ведётся в отдельной теме
+- выдача и снятие банов
+- редактирование предыдущих сообщений
+- управление историей чата: оператор чата может удалять сообщения пользователя 
+  или свои собственные, либо полностью очистить историю чата со стороны 
+  пользователя
+- управление историей данных пользователя: бот уведомляет об изменении полного
+  имени или имени пользователя, можно посмотреть полную историю изменений
+- мониторинг ошибок через Sentry
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Инструкция по установке бота
+Перейдем сразу к делу. Данная инструкция предназначена для пользователей, **не 
+обладающих** опытом разработки и развертывания программного обеспечения. Мы 
+старались ее настолько простой, насколько это возможно, чтобы команды, которые 
+не могут позволить себе услуги дорогостоящих специалистов, могли развернуть бот
+самостоятельно. Поэтому заварите себе кофе, сделайте глубокий вдох, и начнем.
+
+### Аренда сервера
+Первое, что нам понадобится – это сервер, на котором будет крутиться бот. Бот не
+требователен, и дорогая машина нам не понадобится. Мы будем использовать хостинг
+[Beget](https://beget.com). На момент написания самый дешевй сервер стоил 219 
+рублей в месяц. 
+
+1. Пройдите регистрацию, создайте аккаунт и зайдите в контрольную панель 
+   [здесь](https://beget.com/ru). После входа в слева вы увидите кнопку 
+   `Create`. Нажмите на нее, выпадет список, где нужно будет выбрать
+   `Virtual server`:
+   ![required_permissions](./docs/create_server.png)
+
+2. Выберите регион и тип сервера. Нам подойдет самый дешевый. Регион на ваше 
+   усмотрение.
+   ![required_permissions](./docs/choose_region_type.png)
+
+3. В качестве системы выберите Ubuntu 24.04.
+   ![required_permissions](./docs/choose_os.png)
+
+4. Затем в разделе `Authentication` Нужно будет развернуть пункты `Set passowrd`
+   и `Additional server parameters`.
+   ![required_permissions](./docs/choose_auth1.png)
+
+   Должно получиться что-то такое. Поле пароля будет заполнено автоматически. 
+   Запишите его и не потеряйте. В качестве имени (Virtual server name) можете 
+   ввести что угодно, но вполне подойдет `feedback-bot`, если вы не собираетесь
+   использовать этот сервер для чего-либо еще. Галочку 
+   `Allow access to server fils with file manager` можно отключить.
+   ![required_permissions](./docs/choose_auth2.png)
+
+5. Готово, нажимаем кнопку `Create virtual server`
+
+### Заходим на сервер и подготавливаем его
 
 
-## Running the  bot
 
-### Telegram prerequisites
+## Запуск бота
 
-To run the bot you'll need to do the following on the Telegram side:
+### Предварительные требования Telegram
 
-- Bot token, the one you got from the [@BotFather](https://t.me/BotFather) when you created your bot
-- Create a private group chat
-- Get chat ID: [how to get a group chat id](https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id)
-- Add the bot to the chat
-- Give it the required permissions
+Для запуска бота вам необходимо выполнить следующее в Telegram:
+
+- Токен бота, который вы получили от [@BotFather](https://t.me/BotFather) при создании бота
+- Создать приватную группу
+- Получить ID чата: [как получить ID группового чата](https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id)
+- Добавить бота в чат
+- Выдать ему необходимые разрешения
 
   ![required_permissions](./docs/bot_premissions.png)
 
-### Enable monitoring 
+### Включение мониторинга 
 
-Optionally: create a Sentry project and get a Sentry DSN. However, it's not 
-required to run the bot. 
+Опционально: создать проект Sentry и получить Sentry DSN. Однако это не
+обязательно для запуска бота. 
 
-### Running with docker compose
-- clone the repo
-- create `db.env` from [db.env.example](env/db.env.example)
-- create `bot.env` from [bot.env.example](env/bot.env.example) using the values 
-  from the previous steps 
-- run `docker compose up -d`
+### Запуск с docker compose
+- клонировать репозиторий
+- создать `db.env` из [db.env.example](env/db.env.example)
+- создать `bot.env` из [bot.env.example](env/bot.env.example), используя значения
+  из предыдущих шагов 
+- запустить `docker compose up -d`
 
 
-## Local development
+## Локальная разработка
 
-The recommended way is to use virtualenv. Note that project conventions
-suggest that you keep your venv inside the VCS root.
+Рекомендуемый способ — использовать virtualenv. Обратите внимание, что соглашения
+проекта предполагают хранение venv внутри корня VCS.
 
-Clone the repo:
+Клонировать репозиторий:
 
     $ git clone git@github.com:amb-code/amb-feedback-bot.git
 
-Create the environment:
+Создать окружение:
 
     $ cd amb-feedback-bot
     $ virtualenv -p python3 venv
 
-Install development packages:
+Установить пакеты для разработки:
 
     $ source venv/bin/activate
     $ pip install -r requirements.txt
     $ pip install -r requirements-dev.txt
 
-Create an .env file from [.env.example](.env.example).
+Создать файл .env из [.env.example](.env.example).
 
-Run the development server:
+Запустить сервер разработки:
 
     $ python main.py 
 
 
-## Release flow
+## Процесс релиза
 
-- create a feature branch
-- update the code and tests
-- open an PRR
-- make sure the branch has been deployed successfully, unit and integration 
-  tests pass
-- merge rge PR
+- создать feature-ветку
+- обновить код и тесты
+- открыть PR
+- убедиться, что ветка успешно задеплоена, юнит- и интеграционные
+  тесты проходят
+- смержить PR
