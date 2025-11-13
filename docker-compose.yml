@@ -10,7 +10,7 @@ services:
     volumes:
       - ./data:/app/data
     env_file:
-      - env/bot.env
+      - ./env/bot.env
     depends_on:
       - postgres
     cap_drop:
