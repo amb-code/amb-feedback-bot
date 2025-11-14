@@ -19,6 +19,18 @@ Telegram-бот для обратной связи команд.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Инструкция по установке бота](#%D0%98%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F-%D0%BF%D0%BE-%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B5-%D0%B1%D0%BE%D1%82%D0%B0)
+  - [Создание бота, канала, получение идентификатора чата в Telegram](#%D0%A1%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BE%D1%82%D0%B0-%D0%BA%D0%B0%D0%BD%D0%B0%D0%BB%D0%B0-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B8%D0%B4%D0%B5%D0%BD%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%82%D0%BE%D1%80%D0%B0-%D1%87%D0%B0%D1%82%D0%B0-%D0%B2-telegram)
+  - [Аренда сервера](#%D0%90%D1%80%D0%B5%D0%BD%D0%B4%D0%B0-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0)
+  - [Начальная настройка сервера](#%D0%9D%D0%B0%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0)
+  - [Развертывание бота](#%D0%A0%D0%B0%D0%B7%D0%B2%D0%B5%D1%80%D1%82%D1%8B%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%B1%D0%BE%D1%82%D0%B0)
+- [Запуск бота](#%D0%97%D0%B0%D0%BF%D1%83%D1%81%D0%BA-%D0%B1%D0%BE%D1%82%D0%B0)
+  - [Включение мониторинга](#%D0%92%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BC%D0%BE%D0%BD%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%BD%D0%B3%D0%B0)
+  - [Запуск с docker compose](#%D0%97%D0%B0%D0%BF%D1%83%D1%81%D0%BA-%D1%81-docker-compose)
+- [Локальная разработка](#%D0%9B%D0%BE%D0%BA%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F-%D1%80%D0%B0%D0%B7%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BA%D0%B0)
+- [Процесс релиза](#%D0%9F%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%81-%D1%80%D0%B5%D0%BB%D0%B8%D0%B7%D0%B0)
+
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
@@ -236,7 +248,9 @@ Telegram-бот для обратной связи команд.
    ```
 
 7. Сейчас мы загрузим эти файлы в папку `env`, которую создали выше. В шаге 5 
-   раздела [Аренда сервера]() мы обращали внимание на кнопку `File manager`. 
+   раздела 
+   [Аренда сервера](#%D0%90%D1%80%D0%B5%D0%BD%D0%B4%D0%B0-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0) 
+   мы обращали внимание на кнопку `File manager`. 
    Настало время ее нажать. Откроется файловый менеджер с доступом к диску 
    сервера. Вам нужно будет пройти по пути 
    `home > docker > amb-feedback-bot > env` и нажать кнопку `Загрузить файлы`.
