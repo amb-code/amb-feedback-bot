@@ -138,3 +138,6 @@ importuser.json
 
 # Docker Infrastructure
 /data/
+
+# Other files
+.DS_Store

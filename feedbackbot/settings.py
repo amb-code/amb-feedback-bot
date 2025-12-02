@@ -6,7 +6,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
-
+# DEBUG = (
+#         Env.get_bool('IS_OFFLINE', default=False)
+#         or Env.get_bool('CI', default=False)
+#         or Env.get_bool('PYTEST_RUN_CONFIG', default=False)
+# )  # yapf: disable
 
 # Paths
 
@@ -49,7 +53,7 @@ LOGGING = {
         }
     },
 }
-
+# FIXME: если нет DEBUG - уровень INFO
 
 # DB
 
