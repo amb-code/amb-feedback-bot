@@ -72,10 +72,10 @@
 
 2. Далее ввести команды. Каждая следующая команда отправляется только после выполнения сервером предыдущей:
     * установить docker командой: `curl https://get.docker.com | sh`
-    * выдаем права командой: ```useradd -m -g docker docker```
-    * переходим в папку командой: cd /home/docker
-    * скачиваем код на сервер командой: git clone https://github.com/amb-code/amb-feedback-bot-minst.git amb-feedback-bot
-    * выдаем права командой: chown -R 1000:100 /home/docker/amb-feedback-bot
+    * выдаем права командой: `useradd -m -g docker docker`
+    * переходим в папку командой: `cd /home/docker`
+    * скачиваем код на сервер командой: `git clone https://github.com/amb-code/amb-feedback-bot-minst.git amb-feedback-bot`
+    * выдаем права командой: `chown -R 1000:100 /home/docker/amb-feedback-bot`
     * можно закрыть PuTTY
 
 3. Чтобы бот работал, в его параметры нужно записать токен вашего тг-бота, ID группы-коллцентра и отправить параметры на сервер. Это можно сделать с помощью шагов: 
@@ -96,13 +96,13 @@
 
 1. Подключиться к серверу через программу PuTTY
 
-2. Перейти в папку командой: cd /home/docker/amb-feedback-bot
+2. Перейти в папку командой: `cd /home/docker/amb-feedback-bot`
 
 3*. (Пропустить этот пункт при первом запуске бота) Если ранее бот был запущен и вы хотите перезапустить, то предварительно введите команду для его выключения: docker compose down
 
-4. Введите команду для запуска: docker compose up -d
+4. Введите команду для запуска: `docker compose up -d`
 
-5. Бот запущен. Проверить логи бота, чтобы в них не было никаких ошибок и последняя строчка в логах была «... INFO ... POST-INIT: Bot ready, listening...», командой: docker compose logs feedback-bot
+5. Бот запущен. Проверить логи бота, чтобы в них не было никаких ошибок и последняя строчка в логах была «... INFO ... POST-INIT: Bot ready, listening...», командой: `docker compose logs feedback-bot`
 
 6. Можно закрыть PuTTY
 
