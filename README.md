@@ -71,7 +71,7 @@
     * 1.10. при проблемах с подключением посмотрите любой интернет/видео гайд «как подключиться через к серверу с помощью PuTTY» 
 
 2. Далее ввести команды. Каждая следующая команда отправляется только после выполнения сервером предыдущей:
-    * установить docker командой: curl https://get.docker.com | sh
+    * установить docker командой: `curl https://get.docker.com | sh`
     * выдаем права командой: useradd -m -g docker docker
     * переходим в папку командой: cd /home/docker
     * скачиваем код на сервер командой: git clone https://github.com/amb-code/amb-feedback-bot-minst.git amb-feedback-bot
