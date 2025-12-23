@@ -64,17 +64,17 @@ async def post_init(app: Application) -> None:
     app.add_handler(CommandHandler(HelpCommandHandler.name, di.help_command_handler))
 
     # users
-    app.add_handler(MessageHandler(filters.ChatType.PRIVATE, di.forward_message_handler))
-
     app.add_handler(CommandHandler(BanCommandHandler.name, di.ban_command_handler))
     app.add_handler(CommandHandler(UnbanCommandHandler.name, di.unban_command_handler))
     app.add_handler(CommandHandler(UserLogCommandHandler.name, di.userlog_command_handler))
 
     # topics
-    app.add_handler(MessageHandler(filters.REPLY, di.reply_message_handler))
-
     app.add_handler(CommandHandler(DeleteCommandHandler.name, di.delete_command_handler))
     app.add_handler(CommandHandler(DeleteHistoryCommandHandler.name, di.delete_history_command_handler))
+
+    # messages (должны идти после команд, чтобы не перекрывать их)
+    app.add_handler(MessageHandler(filters.REPLY, di.reply_message_handler))
+    app.add_handler(MessageHandler(filters.ChatType.PRIVATE, di.forward_message_handler))
 
     # обработчик ошибок
     app.add_error_handler(di.root_error_handler)
@@ -113,7 +113,6 @@ async def post_init(app: Application) -> None:
         ],
         scope=BotCommandScopeChatAdministrators(chat_id=settings.CHAT_ID),
     )
-
 
     logger.info('POST-INIT: Bot ready, listening...')
 
