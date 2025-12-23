@@ -2,7 +2,7 @@
 
 REGISTRY := registry.marx.guide/amb-public
 REPO := amb-feedback-bot
-VERSION := 1.0.0
+VERSION := 1.0.1
 LOCAL_LATEST := $(REPO):latest
 LOCAL_VERSION := $(REPO):$(VERSION)
 REGISTRY_LATEST := $(REGISTRY)/$(REPO):latest
