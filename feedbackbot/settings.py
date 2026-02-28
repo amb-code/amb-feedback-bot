@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 
@@ -62,7 +63,11 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST')
 DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
-DB_URI = f'postgresql+asyncpg://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+
+DB_URI = (
+    f'postgresql+asyncpg://{quote_plus(DB_USERNAME)}:{quote_plus(DB_PASSWORD)}'
+    f'@{DB_HOST}:{DB_PORT}/{quote_plus(DB_NAME)}'
+)
 
 
 # Commands
