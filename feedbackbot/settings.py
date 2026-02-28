@@ -77,7 +77,7 @@ COMMANDS = {
 
 TOKEN = os.getenv('TG_TOKEN')
 BOT_ID = int(TOKEN.split(':')[0]) if TOKEN else None
-CHAT_ID = os.getenv('TG_CHAT_ID')
+CHAT_ID = int(os.getenv('TG_CHAT_ID'))
 
 
 # Sentry

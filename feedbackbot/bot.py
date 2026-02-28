@@ -2,7 +2,7 @@ import logging.config
 import warnings
 
 import sentry_sdk
-from ptbcontrib.roles import setup_roles
+from ptbcontrib.roles import setup_roles, RolesHandler
 from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from telegram import BotCommandScopeChat, BotCommandScopeChatAdministrators
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, AIORateLimiter
@@ -55,26 +55,55 @@ async def post_init(app: Application) -> None:
             release=VERSION,
         )
 
-    # # Roles
+    # Roles: проверка прав для привилегированных команд (только операторы чата и админы)
     logger.debug('POST-INIT: Setting up roles')
     roles = setup_roles(app)
+    chat_id = int(settings.CHAT_ID)
+
+    if 'operators' not in roles:
+        roles.add_role(name='operators', chat_ids=[chat_id])
+
+    for admin in await app.bot.get_chat_administrators(chat_id):
+        roles.add_admin(admin.user.id)
+
+    privileged_role = roles['operators'] | roles.admins
+
 
     # Handlers
     logger.debug('POST-INIT: Setting up handlers')
     app.add_handler(CommandHandler(StartCommandHandler.name, di.start_command_handler))
     app.add_handler(CommandHandler(HelpCommandHandler.name, di.help_command_handler))
 
-    # users
-    app.add_handler(CommandHandler(BanCommandHandler.name, di.ban_command_handler))
-    app.add_handler(CommandHandler(UnbanCommandHandler.name, di.unban_command_handler))
-    app.add_handler(CommandHandler(UserLogCommandHandler.name, di.userlog_command_handler))
+    # users (только операторы/админы)
+    app.add_handler(RolesHandler(
+        CommandHandler(BanCommandHandler.name, di.ban_command_handler),
+        roles=privileged_role,
+    ))
+    app.add_handler(RolesHandler(
+        CommandHandler(UnbanCommandHandler.name, di.unban_command_handler),
+        roles=privileged_role,
+    ))
+    app.add_handler(RolesHandler(
+        CommandHandler(UserLogCommandHandler.name, di.userlog_command_handler),
+        roles=privileged_role,
+    ))
 
-    # topics
-    app.add_handler(CommandHandler(DeleteCommandHandler.name, di.delete_command_handler))
-    app.add_handler(CommandHandler(DeleteHistoryCommandHandler.name, di.delete_history_command_handler))
+    # topics (только операторы/админы)
+    app.add_handler(RolesHandler(
+        CommandHandler(DeleteCommandHandler.name, di.delete_command_handler),
+        roles=privileged_role,
+    ))
+    app.add_handler(RolesHandler(
+        CommandHandler(DeleteHistoryCommandHandler.name, di.delete_history_command_handler),
+        roles=privileged_role,
+    ))
 
     # messages (должны идти после команд, чтобы не перекрывать их)
-    app.add_handler(MessageHandler(filters.REPLY, di.reply_message_handler))
+    # ответы оператора пользователю — только из чата операторов или от админов
+    app.add_handler(RolesHandler(
+        MessageHandler(filters.REPLY, di.reply_message_handler),
+        roles=privileged_role,
+    ))
     app.add_handler(MessageHandler(filters.ChatType.PRIVATE, di.forward_message_handler))
 
     # обработчик ошибок
