@@ -7,7 +7,7 @@ from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from telegram import BotCommandScopeChat, BotCommandScopeChatAdministrators
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, AIORateLimiter
 
-from feedbackbot import settings
+from feedbackbot import settings, VERSION
 from feedbackbot.core.di import DIAsync
 from feedbackbot.core.db import Base
 from feedbackbot.core.enums import Role
@@ -52,6 +52,7 @@ async def post_init(app: Application) -> None:
                 AsyncioIntegration(),
             ],
             environment=settings.ENVIRONMENT,
+            release=VERSION,
         )
 
     # # Roles
