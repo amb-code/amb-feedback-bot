@@ -14,7 +14,7 @@ aiolimiter>=1.1,<1.3
 git+https://github.com/python-telegram-bot/ptbcontrib.git@main
 
 # Management
-click==8.3.0
+click==8.3.1
 
 # Monitoring
 sentry-sdk==2.39.0
