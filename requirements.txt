@@ -4,7 +4,7 @@ python-dotenv
 
 # DB
 asyncpg==0.30.0
-SQLAlchemy==2.0.43
+SQLAlchemy==2.0.47
 
 # Telegram
 # versions >= 21.5 arer not compatible with ptbcontrib.git@main atm
