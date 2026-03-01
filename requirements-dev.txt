@@ -9,7 +9,7 @@ pytest-faker==2.*
 pytest-factoryboy==2.*
 
 # asyncio
-pytest-asyncio==1.1.0
+pytest-asyncio==1.3.0
 
 # sqlalchemy
 pytest-sqlalchemy-mock==0.1.7
