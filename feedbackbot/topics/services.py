@@ -6,6 +6,7 @@ from telegram.error import Forbidden, BadRequest
 
 from feedbackbot import settings
 from feedbackbot.topics.constants import UNSUPPORTED_CONTENT
+from feedbackbot.topics.utils import sanitize_topic_name
 from feedbackbot.users.constants import USER_BLOCKED_BOT
 from feedbackbot.users.models import User as DBUSer
 from feedbackbot.topics.models import Topic
@@ -25,7 +26,7 @@ class TopicService:
         self._message_repo = message_repo
 
     async def get_or_create_user_topic(self, tg_user: TGUser, db_user: DBUSer) -> tuple[bool, Topic]:
-        topic_name = f'{tg_user.full_name} ({tg_user.username})'
+        topic_name = sanitize_topic_name(tg_user.full_name, tg_user.username)
         db_topics = await self._topic_repo.filter_topics(db_user, ordering=('id', 'desc'))
 
         # 1 вариант: топиков нет, и мы создаем новый
