@@ -45,7 +45,7 @@ async def post_init(app: Application) -> None:
     if getattr(settings, 'SENTRY_DSN'):
         sentry_sdk.init(
             dsn=settings.SENTRY_DSN,
-            send_default_pii=True,
+            send_default_pii=False,
             traces_sample_rate=1.0,
             profiles_sample_rate=1.0,
             integrations=[
