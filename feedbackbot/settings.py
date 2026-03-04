@@ -1,23 +1,22 @@
-import os
 from pathlib import Path
 from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
+from environs import env
 
 load_dotenv()
 
-ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
-# DEBUG = (
-#         Env.get_bool('IS_OFFLINE', default=False)
-#         or Env.get_bool('CI', default=False)
-#         or Env.get_bool('PYTEST_RUN_CONFIG', default=False)
-# )  # yapf: disable
+ENVIRONMENT = env('ENVIRONMENT', 'development')
+DEBUG = (
+    env.bool('DEBUG', False)
+    or env.bool('CI', False)
+    or env.bool('PYTEST_RUN_CONFIG', False)
+)  # yapf: disable
 
 # Paths
 
 ROOT_PATH = Path(__file__).resolve().parents[1]
 TMP_PATH = ROOT_PATH / 'data' / 'tmp'
-
 
 # Logging
 
@@ -29,46 +28,34 @@ LOGGING = {
             'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
             'datefmt': '%d%b %H:%M:%S'
         },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
-        },
-        'cloudwatch': {
-            'format': '%(levelname)s [%(name)s:%(lineno)s] %(message)s'
-        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'standard',
         },
-        'cloudwatch': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'cloudwatch',
-        },
     },
     'loggers': {
         'feedbackbot': {
-            'handlers': ['cloudwatch'],
-            'level': 'DEBUG',
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         }
     },
 }
-# FIXME: если нет DEBUG - уровень INFO
 
 # DB
 
-DB_USERNAME = os.getenv('DB_USERNAME')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT')
-DB_NAME = os.getenv('DB_NAME')
+DB_USERNAME = env('DB_USERNAME', 'posgres')
+DB_PASSWORD = env('DB_PASSWORD', 'postgres')
+DB_HOST = env('DB_HOST', 'localhost')
+DB_PORT = env.int('DB_PORT', 5432)
+DB_NAME = env('DB_NAME', 'feedback_bot')
 
 DB_URI = (
     f'postgresql+asyncpg://{quote_plus(DB_USERNAME)}:{quote_plus(DB_PASSWORD)}'
     f'@{DB_HOST}:{DB_PORT}/{quote_plus(DB_NAME)}'
 )
-
 
 # Commands
 
@@ -77,14 +64,12 @@ COMMANDS = {
     'cleandb': 'feedbackbot.core.commands.clean_db',
 }
 
-
 # Telegram
 
-TOKEN = os.getenv('TG_TOKEN')
+TOKEN = env('TG_TOKEN')
 BOT_ID = int(TOKEN.split(':')[0]) if TOKEN else None
-CHAT_ID = int(os.getenv('TG_CHAT_ID'))
-
+CHAT_ID = env.int('TG_CHAT_ID')
 
 # Sentry
 
-SENTRY_DSN = os.getenv('SENTRY_DSN')
+SENTRY_DSN = env('SENTRY_DSN', None)

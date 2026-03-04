@@ -120,10 +120,10 @@ class TopicService:
         db_reply = await self._reply_repo.get_reply(message.id)
 
         if not db_topic:
-            logger.warning(f'Not a tracked telegram topic, skipping: {message.message_thread_id}')
+            logger.debug(f'Not a tracked telegram topic, skipping: {message.message_thread_id}')
             return
         if not db_reply:
-            logger.warning(f'Not a tracked telegram message, skipping: {message.id}')
+            logger.debug(f'Not a tracked telegram message, skipping: {message.id}')
             return
 
         try:
@@ -167,7 +167,7 @@ class TopicService:
             await self._message_repo.delete_message(db_message.id)
             await self._bot.delete_message(settings.CHAT_ID, db_message.bot_message_id)
         else:
-            logger.debug(f'delete_message_user: Not a tracked message')
+            logger.debug(f'Not a tracked message, skipping: {message_id}')
 
     async def delete_message_operator(self, message_id: int):
         """
@@ -187,7 +187,7 @@ class TopicService:
             # await self._bot.delete_message(settings.CHAT_ID, message_id)
             await self._message_repo.delete_message(db_message.id)
         else:
-            logger.debug(f'delete_message_operator: Not a tracked message')
+            logger.debug(f'Not a tracked message, skipping: {message_id}')
 
     async def delete_reply(self, message_id: int):
         """
@@ -206,10 +206,15 @@ class TopicService:
             # await self._bot.delete_message(settings.CHAT_ID, message_id)
             await self._reply_repo.delete_reply(db_reply.id)
         else:
-            logger.debug(f'delete_reply: Not a tracked reply')
+            logger.debug(f'Not a tracked reply, skipping: {message_id}')
 
     async def delete_history(self, message_thread_id: int):
         db_topic = await self._topic_repo.get_topic(message_thread_id)
+
+        if not db_topic:
+            logger.debug(f'Not a tracked telegram topic, skipping: {message_thread_id}')
+            return
+
         db_messages = await self._message_repo.filter_messages(topic_id=db_topic.id)
         db_replies = await self._reply_repo.filter_replies(topic_id=db_topic.id)
 

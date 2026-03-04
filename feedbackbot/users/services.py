@@ -80,7 +80,7 @@ class UserService:
         db_topic = await self._topic_repo.get_topic(message_thread_id)
 
         if not db_topic:
-            logger.warning(f'Not a tracked telegram topic or empty thread id, skipping: {message_thread_id}')
+            logger.debug(f'Not a tracked telegram topic or empty thread id, skipping: {message_thread_id}')
             return None
 
         user_info_msg = await self._build_user_info(db_topic.user_id)
