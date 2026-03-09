@@ -55,7 +55,7 @@ async def post_init(app: Application) -> None:
             release=VERSION,
         )
 
-    # Roles: проверка прав для привилегированных команд (только операторы чата и админы)
+    # Roles: проверка прав для привилегированных команд (только операторы чата и админы),
     logger.debug('POST-INIT: Setting up roles')
     roles = setup_roles(app)
     chat_id = int(settings.CHAT_ID)
@@ -67,7 +67,6 @@ async def post_init(app: Application) -> None:
         roles.add_admin(admin.user.id)
 
     privileged_role = roles['operators'] | roles.admins
-
 
     # Handlers
     logger.debug('POST-INIT: Setting up handlers')
