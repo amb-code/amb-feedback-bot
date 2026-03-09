@@ -6,7 +6,7 @@ CONTROL_CHARS_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]')
 
 def sanitize_topic_name(full_name: str | None, username: str | None) -> str:
     name_part = (full_name or 'Без имени').strip()
-    username_part = f'{username}' if username else ''
+    username_part = username.strip() if username else ''
 
     raw = f'{name_part} ({username_part})'.strip() if username_part else name_part
     cleaned = CONTROL_CHARS_RE.sub('', raw)
