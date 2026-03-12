@@ -5,5 +5,4 @@ ansible
 .env.example
 .gitignore
 docker-compose.dev.yml
-feedbackbot/manage.py
 README.md
