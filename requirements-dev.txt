@@ -1,5 +1,5 @@
 # pytest
-pytest==8.*
+pytest==9.*
 pytest-cov==6.*
 pytest-mock==3.*
 
