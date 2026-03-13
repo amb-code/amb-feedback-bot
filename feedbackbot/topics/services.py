@@ -6,6 +6,7 @@ from telegram.error import Forbidden, BadRequest
 
 from feedbackbot import settings
 from feedbackbot.topics.constants import UNSUPPORTED_CONTENT
+from feedbackbot.topics.utils import sanitize_topic_name
 from feedbackbot.users.constants import USER_BLOCKED_BOT
 from feedbackbot.users.models import User as DBUSer
 from feedbackbot.topics.models import Topic
@@ -25,7 +26,7 @@ class TopicService:
         self._message_repo = message_repo
 
     async def get_or_create_user_topic(self, tg_user: TGUser, db_user: DBUSer) -> tuple[bool, Topic]:
-        topic_name = f'{tg_user.full_name} ({tg_user.username})'
+        topic_name = sanitize_topic_name(tg_user.full_name, tg_user.username)
         db_topics = await self._topic_repo.filter_topics(db_user, ordering=('id', 'desc'))
 
         # 1 вариант: топиков нет, и мы создаем новый
@@ -119,10 +120,10 @@ class TopicService:
         db_reply = await self._reply_repo.get_reply(message.id)
 
         if not db_topic:
-            logger.warning(f'Not a tracked telegram topic, skipping: {message.message_thread_id}')
+            logger.debug(f'Not a tracked telegram topic, skipping: {message.message_thread_id}')
             return
         if not db_reply:
-            logger.warning(f'Not a tracked telegram message, skipping: {message.id}')
+            logger.debug(f'Not a tracked telegram message, skipping: {message.id}')
             return
 
         try:
@@ -166,7 +167,7 @@ class TopicService:
             await self._message_repo.delete_message(db_message.id)
             await self._bot.delete_message(settings.CHAT_ID, db_message.bot_message_id)
         else:
-            logger.debug(f'delete_message_user: Not a tracked message')
+            logger.debug(f'Not a tracked message, skipping: {message_id}')
 
     async def delete_message_operator(self, message_id: int):
         """
@@ -186,7 +187,7 @@ class TopicService:
             # await self._bot.delete_message(settings.CHAT_ID, message_id)
             await self._message_repo.delete_message(db_message.id)
         else:
-            logger.debug(f'delete_message_operator: Not a tracked message')
+            logger.debug(f'Not a tracked message, skipping: {message_id}')
 
     async def delete_reply(self, message_id: int):
         """
@@ -205,10 +206,15 @@ class TopicService:
             # await self._bot.delete_message(settings.CHAT_ID, message_id)
             await self._reply_repo.delete_reply(db_reply.id)
         else:
-            logger.debug(f'delete_reply: Not a tracked reply')
+            logger.debug(f'Not a tracked reply, skipping: {message_id}')
 
     async def delete_history(self, message_thread_id: int):
         db_topic = await self._topic_repo.get_topic(message_thread_id)
+
+        if not db_topic:
+            logger.debug(f'Not a tracked telegram topic, skipping: {message_thread_id}')
+            return
+
         db_messages = await self._message_repo.filter_messages(topic_id=db_topic.id)
         db_replies = await self._reply_repo.filter_replies(topic_id=db_topic.id)
 
