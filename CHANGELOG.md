@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.2 (2026-04-13)
+
+### Bug Fixes
+
+- AMB-34: Version bump ([#10](https://github.com/amb-code/amb-feedback-bot/pull/10),
+  [`d814bc2`](https://github.com/amb-code/amb-feedback-bot/commit/d814bc2733cf8a43dbf842d7d7f7dfa858f1306b))
+
+
 ## v1.0.1 (2025-12-23)
 
 ### Bug Fixes
