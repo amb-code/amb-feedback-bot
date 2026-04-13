@@ -39,12 +39,23 @@ jobs:
       env-name: production
       docker: true
 
+  approve-deploy-production:
+    name: Approve Deploy Production
+    runs-on: ubuntu-latest
+    environment: manual-approval
+
+    needs: [ release ]
+
+    steps:
+      - name: Deploy Approval
+        run: echo "Approve to deploy"
+
   deploy-production:
     name: Deploy Production
     uses: amb-code/amb-ci-tools/.github/workflows/deploy-ansible.yml@v1.0.0
     secrets: inherit
 
-    needs: [ prepare, release ]
+    needs: [ prepare, release, approve-deploy-production ]
 
     with:
       stage-name: ${{ needs.prepare.outputs.stage-name }}
