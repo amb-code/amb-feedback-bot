@@ -6,7 +6,7 @@ greenlet==3.4.0
 
 # DB
 asyncpg==0.30.0
-SQLAlchemy==2.0.43
+SQLAlchemy==2.0.47
 
 # Telegram
 python-telegram-bot==22.7
@@ -15,7 +15,7 @@ aiolimiter==1.2.1
 git+https://github.com/python-telegram-bot/ptbcontrib.git@main
 
 # Management
-click==8.3.0
+click==8.3.1
 
 # Monitoring
 sentry-sdk==2.39.0
