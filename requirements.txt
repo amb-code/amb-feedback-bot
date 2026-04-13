@@ -10,7 +10,7 @@ SQLAlchemy==2.0.47
 
 # Telegram
 python-telegram-bot==22.7
-# for some reason python-telegram-bot[rate-limiter]==21.5 doesn't work
+# for some reason python-telegram-bot[rate-limiter]==22.7 still doesn't work at the moment of writing
 aiolimiter==1.2.1
 git+https://github.com/python-telegram-bot/ptbcontrib.git@main
 
