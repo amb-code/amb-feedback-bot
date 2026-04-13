@@ -1,7 +1,7 @@
 ###########
 # BUILDER #
 ###########
-FROM python:3.11.11-slim-bullseye AS builder
+FROM python:3.12-slim-bullseye AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.t
 #########
 # FINAL #
 #########
-FROM python:3.11.11-slim-bullseye
+FROM python:3.12-slim-bullseye
 
 RUN addgroup --system app && adduser --system --group app
 
