@@ -1,7 +1,7 @@
 ###########
 # BUILDER #
 ###########
-FROM python:3.12-slim-bullseye AS builder
+FROM python:3.12-slim-bookworm AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.t
 #########
 # FINAL #
 #########
-FROM python:3.12-slim-bullseye
+FROM python:3.12-slim-bookworm
 
 RUN addgroup --system app && adduser --system --group app
 
@@ -28,7 +28,7 @@ ENV APP_HOME=/app
 ENV PYTHONPATH="${PYTHONPATH}:/app/feedbackbot"
 WORKDIR /app
 
-RUN apt-get update && apt-get update -y && apt-get install -y --no-install-recommends netcat
+RUN apt-get update && apt-get update -y && apt-get install -y --no-install-recommends netcat-openbsd
 COPY --from=builder /app/wheels /wheels
 COPY --from=builder /app/requirements.txt .
 RUN pip install --upgrade pip
