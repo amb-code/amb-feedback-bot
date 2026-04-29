@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.0.3 (2026-04-29)
+
+### Bug Fixes
+
+- AMB-35: New CI/CD pipeline, updated docs
+  ([#11](https://github.com/amb-code/amb-feedback-bot/pull/11),
+  [`c17f047`](https://github.com/amb-code/amb-feedback-bot/commit/c17f0478626f07ac802c0cfedcf8d264cabb5b34))
+
+
 ## v1.0.2 (2026-04-13)
 
 ### Bug Fixes
