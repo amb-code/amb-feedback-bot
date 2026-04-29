@@ -9,12 +9,12 @@ on:
 jobs:
   prepare:
     name: Prepare
-    uses: amb-code/amb-ci-tools/.github/workflows/prepare-env.yml@v1.0.0
+    uses: amb-code/amb-ci-tools/.github/workflows/prepare-env.yml@v1.2.0
     secrets: inherit
 
   build:
     name: Build
-    uses: amb-code/amb-ci-tools/.github/workflows/build-python.yml@v1.0.0
+    uses: amb-code/amb-ci-tools/.github/workflows/build-python.yml@v1.2.0
     secrets: inherit
 
     needs: [ prepare ]
@@ -25,7 +25,7 @@ jobs:
 
   release:
     name: Release
-    uses: amb-code/amb-ci-tools/.github/workflows/release.yml@v1.0.0
+    uses: amb-code/amb-ci-tools/.github/workflows/release.yml@v1.2.0
     secrets: inherit
 
     needs: [ prepare, build ]
@@ -38,6 +38,7 @@ jobs:
       stage-name: ${{ needs.prepare.outputs.stage-name }}
       env-name: production
       docker: true
+      docker-image: amb-public/amb-feedback-bot
 
   approve-deploy-production:
     name: Approve Deploy Production
@@ -52,7 +53,7 @@ jobs:
 
   deploy-production:
     name: Deploy Production
-    uses: amb-code/amb-ci-tools/.github/workflows/deploy-ansible.yml@v1.0.0
+    uses: amb-code/amb-ci-tools/.github/workflows/deploy-ansible.yml@v1.2.0
     secrets: inherit
 
     needs: [ prepare, release, approve-deploy-production ]

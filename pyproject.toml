@@ -4,7 +4,6 @@ line_length = 120
 
 [tool.semantic_release]
 version_variables = [
-    "Makefile:VERSION",
     "feedbackbot/__init__.py:VERSION",
 ]
 version_source = "commit"
