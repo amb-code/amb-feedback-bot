@@ -1,6 +1,6 @@
 # pytest
 pytest==9.*
-pytest-cov==6.*
+pytest-cov==7.*
 pytest-mock==3.*
 
 # Factory Boy
