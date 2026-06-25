@@ -5,10 +5,12 @@ from telegram import Bot, Chat, User as TGUser, Message, InputMediaPhoto
 from telegram.error import Forbidden, BadRequest
 
 from feedbackbot import settings
-from feedbackbot.topics.constants import UNSUPPORTED_CONTENT
-from feedbackbot.topics.utils import sanitize_topic_name
 from feedbackbot.users.constants import USER_BLOCKED_BOT
 from feedbackbot.users.models import User as DBUSer
+from feedbackbot.topics.constants import (
+    UNSUPPORTED_CONTENT, DELETE_BY_EDIT_AFTER_48H, MESSAGES_CANNOT_BE_DELETED_OR_EDITED
+)
+from feedbackbot.topics.utils import sanitize_topic_name
 from feedbackbot.topics.models import Topic
 from feedbackbot.topics.repos import TopicRepo, ReplyRepo, MessageRepo
 
@@ -163,8 +165,9 @@ class TopicService:
         # Удаляем только если сообщение есть в базе
         if db_message:
             db_topic = await self._topic_repo.get_topic(db_message.topic_id)
-            await self._bot.delete_message(db_topic.user.id, db_message.id)
-            await self._message_repo.delete_message(db_message.id)
+            # Удаляем сообщение у пользователя
+            await self._delete_user_message_in_user_chat(db_topic.user.id, db_message.id)
+            # Удаляем сообщение у нас в чате
             await self._bot.delete_message(settings.CHAT_ID, db_message.bot_message_id)
         else:
             logger.debug(f'Not a tracked message, skipping: {message_id}')
@@ -182,10 +185,10 @@ class TopicService:
             # В пользовательском чате у этого сообщения есть одно соответствие
             db_message = db_messages[0]
             db_topic = await self._topic_repo.get_topic(db_message.topic_id)
-            await self._bot.delete_message(db_topic.user.id, db_message.id)
-            # решено, что оператор чата чистит руками
+            # Удаляем сообщение у пользователя
+            await self._delete_user_message_in_user_chat(db_topic.user.id, db_message.id)
+            # Решено, что оператор чата чистит руками
             # await self._bot.delete_message(settings.CHAT_ID, message_id)
-            await self._message_repo.delete_message(db_message.id)
         else:
             logger.debug(f'Not a tracked message, skipping: {message_id}')
 
@@ -201,10 +204,10 @@ class TopicService:
         # Удаляем только если ответ еще не удален
         if db_reply:
             db_topic = await self._topic_repo.get_topic(db_reply.topic_id)
-            await self._bot.delete_message(db_topic.user.id, db_reply.bot_message_id)
-            # решено, что оператор чата чистит руками
+            # Удаляем ответ у пользователя в чате
+            await self._delete_operator_reply_in_user_chat(db_topic.user.id, db_reply.bot_message_id, db_reply.id)
+            # Решено, что оператор чата чистит руками
             # await self._bot.delete_message(settings.CHAT_ID, message_id)
-            await self._reply_repo.delete_reply(db_reply.id)
         else:
             logger.debug(f'Not a tracked reply, skipping: {message_id}')
 
@@ -218,10 +221,59 @@ class TopicService:
         db_messages = await self._message_repo.filter_messages(topic_id=db_topic.id)
         db_replies = await self._reply_repo.filter_replies(topic_id=db_topic.id)
 
+        unable_to_delete_count = 0
         for db_message in db_messages:
-            await self._bot.delete_message(db_topic.user.id, db_message.id)
-            await self._message_repo.delete_message(db_message.id)
+            deleted = await self._delete_user_message_in_user_chat(db_topic.user.id, db_message.id)
+            if not deleted:
+                unable_to_delete_count += 1
 
         for db_reply in db_replies:
-            await self._bot.delete_message(db_topic.user.id, db_reply.bot_message_id)
-            await self._reply_repo.delete_reply(db_reply.id)
+            await self._delete_operator_reply_in_user_chat(db_topic.user.id, db_reply.bot_message_id, db_reply.id)
+
+        if unable_to_delete_count:
+            await self._bot.send_message(
+                settings.CHAT_ID,
+                message_thread_id=db_topic.id,
+                text=MESSAGES_CANNOT_BE_DELETED_OR_EDITED.format(unable_to_delete_count),
+            )
+
+    async def _delete_user_message_in_user_chat(self, user_id: int, message_id: int) -> bool:
+        try:
+            await self._bot.delete_message(user_id, message_id)
+            await self._message_repo.delete_message(message_id)
+
+            return True
+
+        except BadRequest:
+            # Попытка отредактировать тоже работает не всегда
+            logger.warning(f"Message {message_id} is older than 48h: trying to edit.")
+            try:
+                await self._bot.edit_message_text(
+                    text=DELETE_BY_EDIT_AFTER_48H,
+                    chat_id=user_id,
+                    message_id=message_id
+                )
+                await self._message_repo.delete_message(message_id)
+
+                return True
+
+            except BadRequest:
+                # Удаляем сообщение из трэка, с которым все равно ничего нельзя сделать
+                logger.error(f"Message {message_id} is older than 48h and cannot be edited.")
+                await self._message_repo.delete_message(message_id)
+
+                return False
+
+    async def _delete_operator_reply_in_user_chat(self, user_id: int, bot_message_id: int, reply_id: int):
+        try:
+            await self._bot.delete_message(user_id, bot_message_id)
+        except BadRequest:
+            # По идее, свои сообщения мы можем редактировать всегда, хотя пока не на 100% понятно
+            logger.warning(f"Reply {bot_message_id} is older than 48h: trying to edit.")
+            await self._bot.edit_message_text(
+                text=DELETE_BY_EDIT_AFTER_48H,
+                chat_id=user_id,
+                message_id=bot_message_id
+            )
+
+        await self._reply_repo.delete_reply(reply_id)
