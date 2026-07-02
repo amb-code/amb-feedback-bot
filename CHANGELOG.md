@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.0 (2026-07-02)
+
+### Features
+
+- AMB-36: Fix message deletion ([#17](https://github.com/amb-code/amb-feedback-bot/pull/17),
+  [`4c5baa7`](https://github.com/amb-code/amb-feedback-bot/commit/4c5baa7b0a2cb71807871879b0fb225a7888f4ed))
+
+
 ## v1.0.3 (2026-04-29)
 
 ### Bug Fixes
