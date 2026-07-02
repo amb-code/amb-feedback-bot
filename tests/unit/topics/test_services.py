@@ -6,7 +6,9 @@ from telegram.error import BadRequest, Forbidden
 
 from feedbackbot import settings
 from feedbackbot.core.di import DIAsync
-from feedbackbot.topics.constants import UNSUPPORTED_CONTENT
+from feedbackbot.topics.constants import (
+    UNSUPPORTED_CONTENT, DELETE_BY_EDIT_AFTER_48H, MESSAGES_CANNOT_BE_DELETED_OR_EDITED
+)
 from feedbackbot.topics.models import Topic
 from feedbackbot.topics.services import TopicService
 from feedbackbot.users.constants import USER_BLOCKED_BOT
@@ -337,6 +339,47 @@ class TestTopicService:
         self.under_test._message_repo.delete_message.assert_called_once_with(db_message.id)
 
     @pytest.mark.asyncio
+    async def test_delete_message_operator_fallback_edit(self, mocker: MockerFixture, bot, db_message_factory,
+                                                         db_topic_factory):  # yapf: disable
+        # given
+        db_message = db_message_factory()
+        db_topic = db_topic_factory(id=db_message.topic_id)
+
+        mocker.patch.object(bot, 'delete_message', side_effect=BadRequest("Message can't be deleted"))
+        mocker.spy(bot, 'edit_message_text')
+        self.under_test._message_repo.filter_messages.return_value = [db_message]
+        self.under_test._topic_repo.get_topic.return_value = db_topic
+
+        # when
+        await self.under_test.delete_message_operator(db_message.bot_message_id)
+
+        # then
+        bot.edit_message_text.assert_called_once_with(
+            text=DELETE_BY_EDIT_AFTER_48H,
+            chat_id=db_topic.user.id,
+            message_id=db_message.id,
+        )
+        self.under_test._message_repo.delete_message.assert_called_once_with(db_message.id)
+
+    @pytest.mark.asyncio
+    async def test_delete_message_operator_cannot_delete_or_edit(self, mocker: MockerFixture, bot, db_message_factory,
+                                                                 db_topic_factory):  # yapf: disable
+        # given
+        db_message = db_message_factory()
+        db_topic = db_topic_factory(id=db_message.topic_id)
+
+        mocker.patch.object(bot, 'delete_message', side_effect=BadRequest("Message can't be deleted"))
+        mocker.patch.object(bot, 'edit_message_text', side_effect=BadRequest("Message can't be edited"))
+        self.under_test._message_repo.filter_messages.return_value = [db_message]
+        self.under_test._topic_repo.get_topic.return_value = db_topic
+
+        # when
+        await self.under_test.delete_message_operator(db_message.bot_message_id)
+
+        # then
+        self.under_test._message_repo.delete_message.assert_called_once_with(db_message.id)
+
+    @pytest.mark.asyncio
     async def test_delete_message_operator_not_exists(self, mocker: MockerFixture, bot):
         # given
         mocker.spy(bot, 'delete_message')
@@ -367,6 +410,28 @@ class TestTopicService:
         self.under_test._reply_repo.delete_reply.assert_called_once_with(db_reply.id)
 
     @pytest.mark.asyncio
+    async def test_delete_reply_fallback_edit(self, mocker: MockerFixture, bot, db_reply_factory, db_topic_factory):
+        # given
+        db_reply = db_reply_factory()
+        db_topic = db_topic_factory(id=db_reply.topic_id)
+
+        mocker.patch.object(bot, 'delete_message', side_effect=BadRequest("Message can't be deleted"))
+        mocker.spy(bot, 'edit_message_text')
+        self.under_test._reply_repo.get_reply.return_value = db_reply
+        self.under_test._topic_repo.get_topic.return_value = db_topic
+
+        # when
+        await self.under_test.delete_reply(db_reply.id)
+
+        # then
+        bot.edit_message_text.assert_called_once_with(
+            text=DELETE_BY_EDIT_AFTER_48H,
+            chat_id=db_topic.user.id,
+            message_id=db_reply.bot_message_id,
+        )
+        self.under_test._reply_repo.delete_reply.assert_called_once_with(db_reply.id)
+
+    @pytest.mark.asyncio
     async def test_delete_reply_not_exists(self, mocker: MockerFixture, bot):
         # given
         mocker.spy(bot, 'delete_message')
@@ -388,6 +453,7 @@ class TestTopicService:
         db_replies = [db_reply_factory(topic_id=db_topic.id) for _ in range(2)]
 
         mocker.spy(bot, 'delete_message')
+        mocker.spy(bot, 'send_message')
         self.under_test._topic_repo.get_topic.return_value = db_topic
         self.under_test._message_repo.filter_messages.return_value = db_messages
         self.under_test._reply_repo.filter_replies.return_value = db_replies
@@ -399,3 +465,40 @@ class TestTopicService:
         assert bot.delete_message.call_count == len(db_messages) + len(db_replies)
         assert self.under_test._message_repo.delete_message.call_count == len(db_messages)
         assert self.under_test._reply_repo.delete_reply.call_count == len(db_replies)
+        bot.send_message.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_delete_history_notifies_when_messages_cannot_be_deleted(
+        self, mocker: MockerFixture, bot, db_topic_factory, db_message_factory, db_reply_factory
+    ):  # yapf: disable
+        # given
+        db_topic = db_topic_factory()
+        db_messages = [db_message_factory(topic_id=db_topic.id) for _ in range(2)]
+        db_replies = [db_reply_factory(topic_id=db_topic.id)]
+
+        mocker.patch.object(
+            bot,
+            'delete_message',
+            side_effect=[
+                None,
+                BadRequest("Message can't be deleted"),
+                None,
+            ],
+        )
+        mocker.patch.object(bot, 'edit_message_text', side_effect=BadRequest("Message can't be edited"))
+        mocker.spy(bot, 'send_message')
+        self.under_test._topic_repo.get_topic.return_value = db_topic
+        self.under_test._message_repo.filter_messages.return_value = db_messages
+        self.under_test._reply_repo.filter_replies.return_value = db_replies
+
+        # when
+        await self.under_test.delete_history(db_topic.id)
+
+        # then
+        assert self.under_test._message_repo.delete_message.call_count == len(db_messages)
+        assert self.under_test._reply_repo.delete_reply.call_count == len(db_replies)
+        bot.send_message.assert_called_once_with(
+            settings.CHAT_ID,
+            message_thread_id=db_topic.id,
+            text=MESSAGES_CANNOT_BE_DELETED_OR_EDITED.format(1),
+        )
