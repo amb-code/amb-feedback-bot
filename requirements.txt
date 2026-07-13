@@ -18,6 +18,6 @@ git+https://github.com/python-telegram-bot/ptbcontrib.git@main
 click==8.3.1
 
 # Monitoring
-sentry-sdk==2.39.0
+sentry-sdk==2.58.0
 
 # venv hash bump 1
