@@ -2,7 +2,7 @@
 dependencies==7.7.1
 python-dotenv
 environs==14.6.0
-greenlet==3.4.0
+greenlet==3.5.0
 
 # DB
 asyncpg==0.30.0
