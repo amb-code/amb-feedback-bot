@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.1.1 (2026-09-01)
+
+### Bug Fixes
+
+- Correct DB_USERNAME default, rename CODEOWNERS
+  ([#18](https://github.com/amb-code/amb-feedback-bot/pull/18),
+  [`7f59be6`](https://github.com/amb-code/amb-feedback-bot/commit/7f59be60e29977943026122cb5f4eb0bb7648a6a))
+
+
 ## v1.1.0 (2026-07-02)
 
 ### Features
