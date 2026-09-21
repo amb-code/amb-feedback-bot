@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.2 (2026-09-21)
+
+### Bug Fixes
+
+- AMB-40: Fix markdown ([#20](https://github.com/amb-code/amb-feedback-bot/pull/20),
+  [`f9fb67d`](https://github.com/amb-code/amb-feedback-bot/commit/f9fb67dd2c580b576e584326bea3d1f3d2461bce))
+
+
 ## v1.1.1 (2026-09-01)
 
 ### Bug Fixes
