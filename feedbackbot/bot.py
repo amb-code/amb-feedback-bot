@@ -1,5 +1,4 @@
 import logging.config
-import warnings
 
 import sentry_sdk
 from ptbcontrib.roles import setup_roles, RolesHandler
@@ -16,14 +15,6 @@ from feedbackbot.users.handlers import BanCommandHandler, UnbanCommandHandler, U
 from feedbackbot.topics.handlers import DeleteCommandHandler, DeleteHistoryCommandHandler
 
 logger = logging.getLogger(__name__)
-
-
-# Отключаем ненужные варнинги в отношении форматирования MarkdownV2
-warnings.filterwarnings(
-    action='ignore',
-    category=SyntaxWarning,
-    module=r'.*common.handlers'
-)
 
 
 async def post_init(app: Application) -> None:

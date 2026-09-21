@@ -3,6 +3,7 @@ import datetime
 import pytest
 from pytest_mock import MockerFixture
 from telegram import Update
+from telegram.error import BadRequest
 
 from feedbackbot.core.di import DIAsync
 from feedbackbot.topics.models import Topic, Message
@@ -59,9 +60,9 @@ class TestForwardMessageHandler:
         assert actual_logs[1].value == expected_user_username
 
         # начальная информация отправлена в чат
-        # call('-1002173328097', message_thread_id=1, text='Пользователь 2181914066:\n\n*Первичная информация*\n
-        # Полное имя: black number\nИмя пользователя: [@return](tg://user?id=2181914066)\n\n', parse_mode='Markdown')
         bot.send_message.assert_called_once()
+        assert bot.send_message.call_args.kwargs['parse_mode'] == 'HTML'
+        assert '<b>Первичная информация</b>' in bot.send_message.call_args.kwargs['text']
 
         # сообщение закреплено
         bot.pin_chat_message.assert_called_once()
@@ -121,6 +122,26 @@ class TestForwardMessageHandler:
         self.under_test._topic_service.get_or_create_user_topic.assert_not_called()
         self.under_test._user_service.log_user_changes.assert_not_called()
         self.under_test._topic_service.forward_user_pm.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_call_forwards_when_userlog_fails(self, mocker: MockerFixture, mocked_session,
+                                                    tg_update_factory):  # yapf: disable
+        # given
+        tg_update: Update = tg_update_factory()
+        mocker.patch.object(
+            self.under_test._user_service,
+            'send_userlog_message',
+            side_effect=BadRequest("Can't parse entities"),
+        )
+
+        # when
+        await self.under_test(tg_update, {})
+
+        # then
+        actual_topics = mocked_session.query(Topic).filter_by(user_id=tg_update.message.from_user.id).all()
+        assert len(actual_topics) == 1
+        actual_messages = mocked_session.query(Message).filter_by(topic_id=actual_topics[0].id).all()
+        assert len(actual_messages) == 1
 
 
 class TestBanCommandHandler:
@@ -219,12 +240,12 @@ class TestUserLogCommandHandler:
         assert bot.sent_messages[0].text == (
             f'Пользователь {str(db_user.id)}:\n'
             '\n'
-            '*Первичная информация*\n'
+            '<b>Первичная информация</b>\n'
             'Полное имя: Вася Пупкин\n'
-            f'Имя пользователя: [@abc](tg://user?id={str(db_user.id)})\n'
+            f'Имя пользователя: <a href="tg://user?id={str(db_user.id)}">@abc</a>\n'
             '\n'
-            '*Полная история изменений*\n'
-            '- 2025-03-12 16:14:02: Поле "полное имя" изменено на `Иван Иванов`\n'
-            '- 2025-03-12 16:14:03: Поле "имя пользователя" изменено на `def`\n'
-            '- 2025-03-12 16:14:04: Поле "статус бана" изменено на `да`\n'
+            '<b>Полная история изменений</b>\n'
+            '- 2025-03-12 16:14:02: Поле "полное имя" изменено на <code>Иван Иванов</code>\n'
+            '- 2025-03-12 16:14:03: Поле "имя пользователя" изменено на <code>def</code>\n'
+            '- 2025-03-12 16:14:04: Поле "статус бана" изменено на <code>да</code>\n'
         )

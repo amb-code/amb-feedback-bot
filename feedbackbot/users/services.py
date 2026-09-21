@@ -1,6 +1,9 @@
 import logging
+from html import escape
 
 from telegram import User as TGUser, Bot, Message
+from telegram.error import TelegramError
+from telegram.helpers import mention_html
 
 from feedbackbot import settings
 from feedbackbot.topics.repos import TopicRepo
@@ -85,7 +88,7 @@ class UserService:
 
         user_info_msg = await self._build_user_info(db_topic.user_id)
         message = await self._bot.send_message(
-            settings.CHAT_ID, message_thread_id=db_topic.id, text=user_info_msg, parse_mode='Markdown'
+            settings.CHAT_ID, message_thread_id=db_topic.id, text=user_info_msg, parse_mode='HTML'
         )
 
         return message
@@ -100,15 +103,19 @@ class UserService:
         if new_value != prev_value:
             # оповещаем только если уже есть история
             if prev_value:
-                await self._bot.send_message(
-                    settings.CHAT_ID,
-                    message_thread_id=topic_id,
-                    text=(
-                        f'Пользователь изменил поле "{self._get_hr_field_name(field_name)}": '
-                        f'`{prev_value}` -> `{new_value}`'
-                    ),
-                    parse_mode='Markdown'
-                )
+                try:
+                    await self._bot.send_message(
+                        settings.CHAT_ID,
+                        message_thread_id=topic_id,
+                        text=(
+                            f'Пользователь изменил поле "{self._get_hr_field_name(field_name)}": '
+                            f'<code>{escape(prev_value)}</code> -> '
+                            f'<code>{escape(new_value)}</code>'
+                        ),
+                        parse_mode='HTML'
+                    )
+                except TelegramError:
+                    logger.exception('Failed to send user data change notification')
             await self._user_log_repo.create_user_log(user_id, field=field_name, value=new_value)
 
     async def _build_user_info(self, user_id: int) -> str:
@@ -116,31 +123,25 @@ class UserService:
         full_name_logs = list(filter(lambda e: e.field == UserLogField.FULL_NAME.value, all_logs))
         username_logs = list(filter(lambda e: e.field == UserLogField.USERNAME.value, all_logs))
 
+        username = username_logs[0].value
         msg = (f'Пользователь {user_id}:\n'
                f'\n'
-               f'*Первичная информация*\n'
-               f'Полное имя: {full_name_logs[0].value}\n'
-               f'Имя пользователя: '
-               f'[@{self._escape_username(username_logs[0].value)}](tg://user?id={user_id})\n'
+               f'<b>Первичная информация</b>\n'
+               f'Полное имя: {escape(full_name_logs[0].value)}\n'
+               f'Имя пользователя: {mention_html(user_id, f"@{username}")}\n'
                f'\n')
 
         # если есть записи, кроме первичного лога
         if len(all_logs) > 2:
-            msg += f'*Полная история изменений*\n'
+            msg += '<b>Полная история изменений</b>\n'
             for log_record in all_logs[2:]:
                 msg += (
                     f'- {log_record.timestamp.strftime(self.USERLOG_DATE_FORMAT)}: '
-                    f'Поле "{self._get_hr_field_name(log_record.field)}" изменено на `{log_record.value}`\n'
+                    f'Поле "{self._get_hr_field_name(log_record.field)}" изменено на '
+                    f'<code>{escape(log_record.value)}</code>\n'
                 )
 
         return msg
 
     def _get_hr_field_name(self, field_name):
         return self.FIELD_NAME_HUMAN_READABLE_MAPPING.get(field_name) or field_name
-
-    def _escape_username(self, s):
-        return (
-            s
-            .replace('[', '')
-            .replace(']', '')
-        )

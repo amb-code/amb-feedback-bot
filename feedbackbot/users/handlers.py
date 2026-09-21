@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes
 from feedbackbot import settings
 from feedbackbot.core.handlers import BaseCommandHandler
 from feedbackbot.topics.services import TopicService
-from feedbackbot.users.constants import USER_BANNED
+from feedbackbot.users.constants import USER_BANNED, FAILED_TO_PIN_USER_INFO
 from feedbackbot.users.services import UserService
 
 logger = logging.getLogger(__name__)
@@ -40,8 +40,17 @@ class ForwardMessageHandler:
 
         # при создании топика прикрепляем начальную карточку пользователя
         if created:
-            message = await self._user_service.send_userlog_message(db_topic.id)
-            await self._bot.pin_chat_message(settings.CHAT_ID, message_id=message.id)
+            try:
+                message = await self._user_service.send_userlog_message(db_topic.id)
+                if message:
+                    await self._bot.pin_chat_message(settings.CHAT_ID, message_id=message.id)
+            except Exception as e:
+                logger.exception('Failed to pin user card')
+                await self._bot.send_message(
+                    settings.CHAT_ID,
+                    message_thread_id=db_topic.id,
+                    text=FAILED_TO_PIN_USER_INFO,
+                )
 
         await self._topic_service.forward_user_pm(update.message, db_topic)
 
