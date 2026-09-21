@@ -46,7 +46,7 @@ LOGGING = {
 
 # DB
 
-DB_USERNAME = env('DB_USERNAME', 'posgres')
+DB_USERNAME = env('DB_USERNAME', 'postgres')
 DB_PASSWORD = env('DB_PASSWORD', 'postgres')
 DB_HOST = env('DB_HOST', 'localhost')
 DB_PORT = env.int('DB_PORT', 5432)
